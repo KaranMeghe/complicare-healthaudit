@@ -61,7 +61,7 @@ model UserRole {
 
 model RefreshToken {
   id String @id @default(uuid())
-  token String @db.VarChar(255)
+  token String @unique @db.VarChar(255)
   userId String
   expiresAt DateTime
   createdAt DateTime @default(now())
