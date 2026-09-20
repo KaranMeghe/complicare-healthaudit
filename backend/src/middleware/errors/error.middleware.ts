@@ -1,7 +1,7 @@
 /** @format */
 
 import type { NextFunction, Request, Response } from 'express';
-import { ConflictError } from './errors/ConflictError.js';
+import { ConflictError } from './ConflictError.js';
 
 export const errorMiddleware = (err: Error, _req: Request, res: Response, _next: NextFunction) => {
   console.error(err);

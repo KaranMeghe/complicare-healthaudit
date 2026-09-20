@@ -1,6 +1,6 @@
 /** @format */
 
-import { signupSchema } from '../auth/auth.validation.js';
+import { signupSchema } from '../auth.validation.js';
 
 const validSignupData = {
   email: 'aman@citycentral.com',
