@@ -2,6 +2,7 @@
 
 import { z } from 'zod';
 
+// SignupSchema
 export const signupSchema = z.object({
   email: z.email(),
   password: z
@@ -15,13 +16,8 @@ export const signupSchema = z.object({
   lastName: z.string().trim().min(2, 'Last name must be at least 2 characters'),
 });
 
-const signupData = {
-  email: 'aman@citycentral.com',
-  password: 'CityCentral@123',
-  firstName: 'Aman',
-  lastName: 'Sharma',
-};
-
-const result = signupSchema.safeParse(signupData);
-
-console.log(result);
+// LoginSchema
+export const loginSchema = z.object({
+  email: z.email(),
+  password: z.string().min(1, 'Password is required'),
+});

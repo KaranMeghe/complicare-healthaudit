@@ -1,11 +1,13 @@
 /** @format */
 
 import { prisma } from '../../lib/prisma.js';
-import type { SignupRequest } from './auth.types.js';
-import { hashPassword } from '../../lib/password.js';
+import type { LoginRequest, SignupRequest } from './auth.types.js';
+import { hashPassword, comparePassword } from '../../lib/password.js';
 import { ConflictError } from '../../middleware/errors/ConflictError.js';
 import { generateAccessToken, generateRefreshToken, hashToken } from '../../lib/token.js';
+import { UnauthorizedError } from '../../middleware/errors/unauthorizedError.js';
 
+// Register user
 export const registerUser = async (data: SignupRequest) => {
   // email already exists check
   const existingUser = await prisma.user.findUnique({
@@ -29,7 +31,7 @@ export const registerUser = async (data: SignupRequest) => {
     },
   });
 
-  //   Genrate tokens and hash token
+  // Genrate tokens and hash token
   const accessToken = generateAccessToken(user.id);
   const refreshToken = generateRefreshToken();
   const hashedRefreshToken = hashToken(refreshToken);
@@ -52,6 +54,51 @@ export const registerUser = async (data: SignupRequest) => {
       lastName: user.lastName,
       createdAt: user.createdAt.toISOString(),
       updatedAt: user.updatedAt.toISOString(),
+    },
+    accessToken,
+    refreshToken,
+  };
+};
+
+// Login user
+export const loginUser = async (data: LoginRequest) => {
+  // Check user exist by their email
+  const existingUser = await prisma.user.findUnique({
+    where: { email: data.email },
+  });
+
+  if (!existingUser) {
+    throw new UnauthorizedError('Invalid email or password');
+  }
+
+  // Check password is valid or not
+  const isPasswordValid = await comparePassword(data.password, existingUser.passwordHash);
+
+  if (!isPasswordValid) {
+    throw new UnauthorizedError('Invalid email or password');
+  }
+
+  // Genrate Access and Hash Token
+  const accessToken = generateAccessToken(existingUser.id);
+  const refreshToken = generateRefreshToken();
+  const hashedRefreshToken = hashToken(refreshToken);
+
+  await prisma.refreshToken.create({
+    data: {
+      token: hashedRefreshToken,
+      userId: existingUser.id,
+      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+    },
+  });
+
+  return {
+    user: {
+      id: existingUser.id,
+      email: existingUser.email,
+      firstName: existingUser.firstName,
+      lastName: existingUser.lastName,
+      createdAt: existingUser.createdAt.toISOString(),
+      updatedAt: existingUser.updatedAt.toISOString(),
     },
     accessToken,
     refreshToken,

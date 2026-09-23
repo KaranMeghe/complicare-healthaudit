@@ -21,6 +21,10 @@ export interface SignupRequest {
   lastName: string;
 }
 
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
 // ============================================================================
 // RESPONSE TYPES (What client recives)
 // ============================================================================
@@ -35,5 +39,18 @@ export interface UserResponse {
 }
 export interface SignupResponse {
   user: UserResponse;
+  message: string;
+}
+
+export interface LoginResponse {
+  status: 'success';
+  user: {
+    id: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+    createdAt: Date;
+    updatedAt: Date;
+  };
   message: string;
 }

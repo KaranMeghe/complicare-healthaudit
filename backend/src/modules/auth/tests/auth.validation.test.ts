@@ -1,7 +1,8 @@
 /** @format */
 
-import { signupSchema } from '../auth.validation.js';
+import { loginSchema, signupSchema } from '../auth.validation.js';
 
+// SignUp/Register
 const validSignupData = {
   email: 'aman@citycentral.com',
   password: 'CityCentral@123',
@@ -71,5 +72,36 @@ describe('signupSchema', () => {
         ]),
       );
     }
+  });
+});
+
+// Login
+
+describe('loginSchema', () => {
+  it('should accept valid login credentials', () => {
+    const result = loginSchema.safeParse({
+      email: 'arun@citycentral.com',
+      password: 'CityCentral@123',
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  it('should reject an invalid email', () => {
+    const result = loginSchema.safeParse({
+      email: 'invalid-email',
+      password: 'CityCentral@123',
+    });
+
+    expect(result.success).toBe(false);
+  });
+
+  it('should reject an empty password', () => {
+    const result = loginSchema.safeParse({
+      email: 'arun@citycentral.com',
+      password: '',
+    });
+
+    expect(result.success).toBe(false);
   });
 });
