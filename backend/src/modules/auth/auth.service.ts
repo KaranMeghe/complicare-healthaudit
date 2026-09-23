@@ -133,3 +133,24 @@ export const refreshAccessToken = async (token: string) => {
     accessToken,
   };
 };
+
+// Logout the user
+export const logoutUser = async (token: string) => {
+  const hashedRefreshToken = hashToken(token);
+
+  const refreshTokenRecord = await prisma.refreshToken.findUnique({
+    where: {
+      token: hashedRefreshToken,
+    },
+  });
+
+  if (!refreshTokenRecord) {
+    return;
+  }
+
+  await prisma.refreshToken.delete({
+    where: {
+      id: refreshTokenRecord.id,
+    },
+  });
+};

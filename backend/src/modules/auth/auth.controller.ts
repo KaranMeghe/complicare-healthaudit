@@ -1,7 +1,7 @@
 /** @format */
 
 import { type Request, type Response, type NextFunction } from 'express';
-import { loginUser, refreshAccessToken, registerUser } from './auth.service.js';
+import { loginUser, logoutUser, refreshAccessToken, registerUser } from './auth.service.js';
 import { UnauthorizedError } from '../../middleware/errors/unauthorizedError.js';
 
 // Signup / Register user.
@@ -75,5 +75,31 @@ export const refreshController = async (req: Request, res: Response, _next: Next
   res.status(200).json({
     status: 'success',
     message: 'Token refreshed successfully',
+  });
+};
+
+// Logout
+export const logoutController = async (req: Request, res: Response, _next: NextFunction) => {
+  const refreshToken = req.cookies.refreshToken;
+
+  if (refreshToken) {
+    await logoutUser(refreshToken);
+  }
+
+  res.clearCookie('accessToken', {
+    httpOnly: true,
+    secure: false,
+    sameSite: 'strict',
+  });
+
+  res.clearCookie('refreshToken', {
+    httpOnly: true,
+    secure: false,
+    sameSite: 'strict',
+  });
+
+  res.status(200).json({
+    status: 'success',
+    message: 'User logged out successfully',
   });
 };
