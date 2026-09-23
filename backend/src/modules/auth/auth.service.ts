@@ -104,3 +104,32 @@ export const loginUser = async (data: LoginRequest) => {
     refreshToken,
   };
 };
+
+// Refresh Access Token
+export const refreshAccessToken = async (token: string) => {
+  // Hash refresh token
+  const hashedRefreshToken = hashToken(token);
+
+  // Find refresh token in RefreshToken table
+  const refreshTokenRecord = await prisma.refreshToken.findUnique({
+    where: {
+      token: hashedRefreshToken,
+    },
+  });
+
+  if (!refreshTokenRecord) {
+    throw new UnauthorizedError('Invalid or expired refresh token');
+  }
+
+  // Check token expiry
+  if (refreshTokenRecord.expiresAt < new Date()) {
+    throw new UnauthorizedError('Invalid or expired refresh token');
+  }
+
+  // Generate new access token
+  const accessToken = generateAccessToken(refreshTokenRecord.userId);
+
+  return {
+    accessToken,
+  };
+};

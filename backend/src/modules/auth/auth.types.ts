@@ -54,3 +54,8 @@ export interface LoginResponse {
   };
   message: string;
 }
+
+export interface RefreshResponse {
+  status: 'success';
+  message: string;
+}

@@ -1,7 +1,8 @@
 /** @format */
 
 import { type Request, type Response, type NextFunction } from 'express';
-import { loginUser, registerUser } from './auth.service.js';
+import { loginUser, refreshAccessToken, registerUser } from './auth.service.js';
+import { UnauthorizedError } from '../../middleware/errors/unauthorizedError.js';
 
 // Signup / Register user.
 export const registerController = async (req: Request, res: Response, _next: NextFunction) => {
@@ -50,5 +51,29 @@ export const loginController = async (req: Request, res: Response, _next: NextFu
     status: 'success',
     user: result.user,
     message: 'User logged in successfully',
+  });
+};
+
+// Refresh
+export const refreshController = async (req: Request, res: Response, _next: NextFunction) => {
+  // Extract the token
+  const refreshToken = req.cookies.refreshToken;
+
+  if (!refreshToken) {
+    throw new UnauthorizedError('Invalid or expired refresh token');
+  }
+
+  const result = await refreshAccessToken(refreshToken);
+
+  res.cookie('accessToken', result.accessToken, {
+    httpOnly: true,
+    secure: false,
+    sameSite: 'strict',
+    maxAge: 15 * 60 * 1000,
+  });
+
+  res.status(200).json({
+    status: 'success',
+    message: 'Token refreshed successfully',
   });
 };
